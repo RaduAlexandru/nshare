@@ -180,12 +180,22 @@ where
         let std_layout = self.is_standard_layout();
         let nrows = Dy::new(self.nrows());
         let ncols = Dy::new(self.ncols());
-        let mut res = Self::Out::from_vec_generic(nrows, ncols, self.into_raw_vec());
-        if std_layout {
-            // This can be expensive, but we have no choice since nalgebra VecStorage is always
-            // column-based.
-            res.transpose_mut();
-        }
+        // let mut res = Self::Out::from_vec_generic(nrows, ncols, self.into_raw_vec());
+        let res = {
+            if std_layout {
+                let res =
+                    Self::Out::from_row_slice(self.nrows(), self.ncols(), self.as_slice().unwrap());
+                res
+            } else {
+                let res = Self::Out::from_vec_generic(nrows, ncols, self.into_raw_vec());
+                res
+            }
+        };
+        // if std_layout {
+        //     // This can be expensive, but we have no choice since nalgebra VecStorage is always
+        //     // column-based.
+        //     res.transpose_mut();
+        // }
         res
     }
 }
